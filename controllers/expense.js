@@ -7,12 +7,11 @@ exports.getExpense = async (req, res, next) => {
         const page = +req.query.page || 1;
         const offset = limit * (page - 1);
 
-        const expensePromise = Expense.find({ userId: req.user._id })
+        const expensePromise = await Expense.find({ userId: req.user._id })
             .limit(limit)
             .skip(offset)
-            .exec()
 
-        const countDocs = Expense.countDocuments({ userId: req.user._id })
+        const countDocs = await Expense.countDocuments({ userId: req.user._id })
 
         Promise.all([expensePromise, countDocs])
             .then(([expenses, count]) => {

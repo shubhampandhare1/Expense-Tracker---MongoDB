@@ -51,20 +51,29 @@ function showPagination(pageData) {
         const btn3 = document.createElement('button');
         btn3.className = 'btn btn-light'
         btn3.innerHTML = `${pageData.prevPage}`;
-        btn3.addEventListener('click', () => getExpenses(pageData.prevPage))
+        btn3.addEventListener('click', () => {
+            localStorage.setItem('currPage', pageData.prevPage);
+            getExpenses(pageData.prevPage);
+        })
         pagination.appendChild(btn3);
     }
     const btn1 = document.createElement('button');
     btn1.className = 'btn btn-light m-1 btn-lg'
     btn1.innerHTML = `${pageData.currPage}`;
-    btn1.addEventListener('click', () => getExpenses(pageData.currPage))
+    btn1.addEventListener('click', () => {
+        localStorage.setItem('currPage', pageData.currPage);
+        getExpenses(pageData.currPage);
+    })
     pagination.appendChild(btn1);
 
     if (pageData.hasNextPage) {
         const btn2 = document.createElement('button');
         btn2.className = 'btn btn-light'
         btn2.innerHTML = `${pageData.nextPage}`;
-        btn2.addEventListener('click', () => getExpenses(pageData.nextPage))
+        btn2.addEventListener('click', () => {
+            localStorage.setItem('currPage', pageData.nextPage);
+            getExpenses(pageData.nextPage);
+        })
         pagination.appendChild(btn2);
     }
 }
@@ -80,6 +89,7 @@ async function getExpenses(page) {
         expArr.forEach((exp) => {
             showExpenseInTable(exp)
         })
+        localStorage.setItem('lastpage', response.data.lastpage);
         showPagination(response.data);
     } catch (error) {
         showError(error)
@@ -97,15 +107,17 @@ async function addExpense(event) {
             category: event.target.category.value,
             date: today,
         }
-        console.log('editId>>>>>>>>', editId)
+        
         if (editId == null) {
             const response = await axios.post(`${baseUrl}/expense/add-expense`, expense, { headers: { "Authorization": token } });
-            
+
             showExpenseInTable(response.data.newExpense);
+            getExpenses(localStorage.getItem('lastpage'));
         }
         else {
             await axios.put(`${baseUrl}/expense/edit-expense/${editId}`, expense, { headers: { "Authorization": token } })
-            location.reload();
+            let currPage = localStorage.getItem('currPage');
+            getExpenses(currPage);
         }
 
     } catch (error) {
@@ -279,7 +291,7 @@ async function recentdownload() {
         let recentdownloads = document.getElementById('recentdownloads');
         response.data.forEach((data) => {
             let file = document.createElement('li');
-            const date = (data.date).substring(0,10);
+            const date = (data.date).substring(0, 10);
             file.innerHTML = `<a href="${data.fileUrl}">Downloaded On ${date}  </a>`;
             recentdownloads.appendChild(file);
         })

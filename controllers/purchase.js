@@ -1,5 +1,5 @@
 const Razorpay = require('razorpay');
-const Order = require('../models/order');
+const Purchase = require('../models/purchase');
 const User = require('../models/user');
 
 const userController = require('./user');
@@ -16,7 +16,7 @@ exports.purchasePremium = async (req, res, next) => {
                 throw new Error(JSON.stringify(err));
             }
             try {
-                const createOrder = new Order({
+                const createOrder = new Purchase({
                     orderid: order.id,
                     status: 'PENDING',
                     userId: req.user
@@ -40,7 +40,7 @@ exports.updateTransactionStatus = async (req, res, next) => {
 
     if (paymentid != 'payment_failed') {
         try {
-            const order = await Order.findOne({orderid: orderid})
+            const order = await Purchase.findOne({orderid: orderid})
 
             order.status = 'SUCCESSFUL';
             order.paymentid = paymentid;
@@ -57,9 +57,7 @@ exports.updateTransactionStatus = async (req, res, next) => {
     }
     else {
         try {
-            await Order.findByIdAndUpdate({ orderid: orderid }, { paymentid: paymentid, status: 'Failed' });
-
-            await User.findByIdAndUpdate({ _id: req.user._id }, { isPremiumUser: false });
+            await Purchase.findOneAndUpdate({ orderid: orderid }, { paymentid: paymentid, status: 'Failed' });
 
             return res.status(202).json({ success: true, message: 'Transaction Failed' });
         }

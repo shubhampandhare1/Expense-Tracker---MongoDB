@@ -56,7 +56,7 @@ exports.downloadExpense = async (req, res, next) => {
 exports.recentlyDownloadedFiles = async (req, res, next) => {
     try {
         const recentdownloadedfiles = await DownloadedFiles.find({ userId: req.user._id });
-        console.log(recentdownloadedfiles);
+
         res.status(200).json(recentdownloadedfiles)
     } catch (error) {
         res.status(500).json(error)
@@ -77,7 +77,6 @@ exports.showLeaderboard = async (req, res, next) => {
             .sort({
                 totalExpense: 'desc'
             })
-            .exec()
 
         Promise.all(([count, leaderboardofUsers]))
             .then(([count, leaderboardofUsers]) => {
